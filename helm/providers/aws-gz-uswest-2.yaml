@@ -1,0 +1,728 @@
+## Overriding values for Chart's values.yaml for AWS
+##
+global:
+  provider:
+    name: aws
+    region: us-west-2
+    kubernetes:
+       deployment:
+         ## If kubernetes is deployed in multi zone mode then specify availability-zones as appropriate
+         ## If kubernetes is deployed in single availability zone then specify appropriate values
+         zones:
+          - us-west-2a
+          - us-west-2b
+          - us-west-2c
+          - us-west-2d
+    storage:
+      provisioner: kubernetes.io/aws-ebs
+      ## Use Retain if you want to persist data after CP cluster has been uninstalled
+      reclaimPolicy: Delete
+      parameters:
+        encrypted: "false"
+        kmsKeyId: ""
+        type: gp2
+    ## Docker registry endpoint where Confluent Images are available.
+    ##
+    registry:
+      fqdn: docker.io
+      credential:
+        required: false
+  sasl:
+    plain:
+      username: test
+      password: test123
+  authorization:
+    rbac:
+      enabled: false
+    simple:
+      enabled: false
+    superUsers: []
+  dependencies:
+    mds:
+      endpoint: ""
+      publicKey: ""      
+## Zookeeper cluster
+##
+zookeeper:
+  name: zk-hub0
+  replicas: 3
+  resources:
+    requests:
+      cpu: 200m
+      memory: 512Mi
+
+## Kafka Cluster
+##
+kafka:
+  name: kafka-hub0
+  replicas: 3
+  resources:
+    requests:
+      cpu: 200m
+      memory: 1Gi
+  loadBalancer:
+    enabled: true
+    type: internal
+    domain: "sravan.kafka.com"
+    brokerPrefix: "hub0-usw2-"
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+  tls:
+    enabled: true
+    authentication:
+      type: tls
+    fullchain: |-
+      -----BEGIN CERTIFICATE-----
+      MIID6zCCAtOgAwIBAgIJANjKClqA7cZeMA0GCSqGSIb3DQEBBQUAMIGTMQswCQYD
+      VQQGEwJJTjELMAkGA1UECAwCS0ExEjAQBgNVBAcMCUJhbmdhbG9yZTELMAkGA1UE
+      CgwCU1MxDjAMBgNVBAsMBUFscGhhMRswGQYDVQQDDBIqLnNyYXZhbi5rYWZrYS5j
+      b20xKTAnBgkqhkiG9w0BCQEWGnNkb21tYXJhanVAc3RhdGVzdHJlZXQuY29tMB4X
+      DTIwMDcwOTA5NTUyNloXDTIxMDcwOTA5NTUyNlowgZMxCzAJBgNVBAYTAklOMQsw
+      CQYDVQQIDAJLQTESMBAGA1UEBwwJQmFuZ2Fsb3JlMQswCQYDVQQKDAJTUzEOMAwG
+      A1UECwwFQWxwaGExGzAZBgNVBAMMEiouc3JhdmFuLmthZmthLmNvbTEpMCcGCSqG
+      SIb3DQEJARYac2RvbW1hcmFqdUBzdGF0ZXN0cmVldC5jb20wggEiMA0GCSqGSIb3
+      DQEBAQUAA4IBDwAwggEKAoIBAQDC/JdLo4ctmae8BJ2d/J8a5jSHMODSncV71LGq
+      VWF3wujodypSPICS4PeuuoTGL+HyD5Ki/uOO/H2aGoQZiLM48UIfexqFNU3G3rxa
+      6ric+xulCmGj/mEf70w0Bo7vVcSmW2XG8DayP9lDwMVzTqyNzVmhsRexWX/JlwSy
+      j0o5HayXLCnWYGgZJN9w4klgxlQuTiZE0CUtaGAN3KKtS0NLgTdIwLPhXrcHs6Df
+      uRU83VsLhppwoX8p/2gKr2urBGgvdbaUxYqZ5fliEgeWYbYRP6dDK2G0+UoueGPI
+      Tq36n+JZNHjkf8sVdcrH//seR9Ls7SiwFqF+UPFME7S73+BbAgMBAAGjQDA+MB0G
+      A1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAdBgNVHREEFjAUghIqLnNyYXZh
+      bi5rYWZrYS5jb20wDQYJKoZIhvcNAQEFBQADggEBACA3et9uuYRTTTvjQbZqe5vN
+      RJI3lY/Y4gggaekKZ5H4LlFVZ64cnLr4okwtPXoM0amzGy5vffUeNeOgvRr5leia
+      XXPNdBR4jUZlZKHRpdwYxKB61CCx8G5ShUU8OYJDcphLT0ktNPPYDKrlWSLBC7ye
+      wZB/GoA2STEPADDM5kzp8G9sETskPMgqGC+OpU4kKzKxRcH+oCFbEWUX2Hk8GNAM
+      7ueyBqZEvwFN94aGwGvvTZjKYKa8diPuz6uygEQjq5OXjRmkLveSXGUnz+X2+muC
+      8vIV4hDbRxMcZey9xvUUAS3pqzoA5qHyFh9+Wf8dKamGrklJxXhWVL4G70ESIZI=
+      -----END CERTIFICATE-----
+    privkey: |-
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEowIBAAKCAQEAwvyXS6OHLZmnvASdnfyfGuY0hzDg0p3Fe9SxqlVhd8Lo6Hcq
+      UjyAkuD3rrqExi/h8g+Sov7jjvx9mhqEGYizOPFCH3sahTVNxt68Wuq4nPsbpQph
+      o/5hH+9MNAaO71XEpltlxvA2sj/ZQ8DFc06sjc1ZobEXsVl/yZcEso9KOR2slywp
+      1mBoGSTfcOJJYMZULk4mRNAlLWhgDdyirUtDS4E3SMCz4V63B7Og37kVPN1bC4aa
+      cKF/Kf9oCq9rqwRoL3W2lMWKmeX5YhIHlmG2ET+nQythtPlKLnhjyE6t+p/iWTR4
+      5H/LFXXKx//7HkfS7O0osBahflDxTBO0u9/gWwIDAQABAoIBADkOQpNOiZqtUKiy
+      zRBSwJfVbt90TQU0R3pBta87BqdNsGt9mzOvIoxYKgHF8F4x2rLDHcx2O0420eYL
+      BkaWeqMZ7ZhapFsASv77ZDBSaKz+yYsUq5eaMv9uPWUn2iFsfnuTWQfKeKbWChRK
+      Tzy7c8CWqzimImGx57OsbiJ1zWlCosMmKWdXkje2rwAM2kPr3hHDAEOr27O+8nyp
+      m/JFJJc7Z0fETfVmvSiCxLYF5kFOnFgfsWsvHxzXPXGzEtDQxv8dCSt2CfC6f6k5
+      ik9BL0Fy76D4xgVS8lgk1idMWrzhE6gwMNAYOtdjUFoCifPO/I/0S8CxgPoI1GGz
+      MVtmQhECgYEA/ql/07tuMvU7PmX1OgORG1iTfQKWpFlNGCb2zBtLFa4ERiHnmn/A
+      8Aiw3DG0hQPWzIKxaUT5lDTbv1MBOp1FVebsGXRsmGvaVHYISSY+lm8yPtRMINqq
+      6UPUrLAI9dqjE/6V4iQzOr3gZN9Tl/SqdvAruz+IvKGZyjFHfyJWeQMCgYEAxALV
+      N8uqMaAn9fzsrpkNGBShVk9zwTRLCqkTZ5XsmLmkUM+Mi2AIIySoKdf+SRTZyazx
+      NH8D528RO7HCgJ39wynSAN2qL0T8s31la4BdBrAiI26Bm6B6Mgu+UQK/Fz/GVWs9
+      zmaT49+7NPPckMkxfeij2Wworw6k/ftP8/5Gn8kCgYEAt03AQeKG1s0n4Kk5E5If
+      r6RZPUFQt2nEEV9yg8YdjLReRTEAaXgNo3lN/KEWhCwYP8rO8qwATcqiZhvUJaGw
+      l72JMmVYCXqQg/0Vx7lskZHmg80CIx/ip9b4TXjEalr+yVSWBFn0OhMUYudRX25w
+      CP6lK7n2rXhQn3ZLNVq9DYsCgYA9r6qMibMBNSb+Wl/ePtqJFo0DzbNfPWbUbwtl
+      USCJm/rjV74iatGExdeKe6hSNZaoyp2KaOLApgqlX7cXpSEkl3e4wAn8IFjq3+7Y
+      GyirnyjPP8rYQHPUZi+57QRYe8CeR0bHOy8VyuZursReaIMD3gAav9g554DzUXED
+      F6YASQKBgH+VDJRwavO++xehC2wP5zHgBFYyPHPlMDP6Pubvnk5SmWbNd8J2TGk7
+      +NYkJx7NTzMAoTYldmfzqe7uV/gddatBBSer9+MApeRFlnHJUhQKoFUfxhZgzd4X
+      id5Ib3k40CDzxIn5J2RPIAvAipen+oyAi7/amJcQIuCstlnNjj+X
+      -----END RSA PRIVATE KEY-----
+    cacerts: |-
+      -----BEGIN CERTIFICATE-----
+      MIIDpDCCAowCCQDpSMOLnqu2KTANBgkqhkiG9w0BAQsFADCBkzELMAkGA1UEBhMC
+      SU4xCzAJBgNVBAgMAktBMRIwEAYDVQQHDAlCYW5nYWxvcmUxCzAJBgNVBAoMAlNT
+      MQ4wDAYDVQQLDAVBbHBoYTEbMBkGA1UEAwwSKi5zcmF2YW4ua2Fma2EuY29tMSkw
+      JwYJKoZIhvcNAQkBFhpzZG9tbWFyYWp1QHN0YXRlc3RyZWV0LmNvbTAeFw0yMDA3
+      MDkwODAzMzRaFw0yMjA5MTcwODAzMzRaMIGTMQswCQYDVQQGEwJJTjELMAkGA1UE
+      CAwCS0ExEjAQBgNVBAcMCUJhbmdhbG9yZTELMAkGA1UECgwCU1MxDjAMBgNVBAsM
+      BUFscGhhMRswGQYDVQQDDBIqLnNyYXZhbi5rYWZrYS5jb20xKTAnBgkqhkiG9w0B
+      CQEWGnNkb21tYXJhanVAc3RhdGVzdHJlZXQuY29tMIIBIjANBgkqhkiG9w0BAQEF
+      AAOCAQ8AMIIBCgKCAQEA1Hf36992uMU80Uqb+FNgeQeozDe0lEwSTdgiC0u/0YTP
+      PP54UAgwvP0Jf6hYgNkktgGHw3W1xY0bs3gcyKkqKDCLXumJvenifkgGYfDXZB9U
+      CYFtJdwOeQZSqK1JkZPqkXWw9/i9kghvvu0n3EYS39MlJG4x/JzTMQ6GtEeDKpBR
+      JRHM7iO8hEHeQYyCasb6TDydSXYUvDE6a59Iqt/yRbAg8R2/4QYMxKWrw5gyZF7f
+      YCgi0ZYLzrj5ksgtDccrmgOaN0dZhQpCUouEjgqYb9mkNZnojK8Gi/LVlQsAxPoM
+      713qVNZ/8cwiaCLlyJ9m/7aawt38f9y5vJCKoa1ZmQIDAQABMA0GCSqGSIb3DQEB
+      CwUAA4IBAQDACHJk4dGJZusYJdo2ItLloFQ6GETAPw3ctkWLsZz92zIzQbNIvTOc
+      HXR5y2LpDAIyVr45lPV0AI+UZrv3WGCmT0YPGSWi8+7WPBcQF5cfB2Lbc6Y3bK0q
+      Anaekl6hD+RXGx4mvDb71kOHS6k7IoQZ0bzHKun8+fNEZDYJRgtd7pLjeZW4PhL6
+      CJi8Y1CQ0qkKVUUY/3DbvSPE+18cJsglnPKHYZYl9IULN0DB1SwbqJc41woMUPdH
+      lDBk8Ta+xZgSnEGD2NSQBW+8v9URK6WCB1qe41/he1xGun6kGJxjbNI0bCLesgPR
+      aSmoPMAxXsFBKQWQEavDd1FunM+xLejz
+      -----END CERTIFICATE-----
+  metricReporter:
+    enabled: true
+    tls:
+      enabled: true
+
+
+## Connect Cluster
+##
+connect:
+  name: connectors
+  replicas: 2
+  tls:
+    enabled: true
+    port: 443
+    authentication:
+      type: tls
+    fullchain: |-
+      -----BEGIN CERTIFICATE-----
+      MIID6zCCAtOgAwIBAgIJANjKClqA7cZeMA0GCSqGSIb3DQEBBQUAMIGTMQswCQYD
+      VQQGEwJJTjELMAkGA1UECAwCS0ExEjAQBgNVBAcMCUJhbmdhbG9yZTELMAkGA1UE
+      CgwCU1MxDjAMBgNVBAsMBUFscGhhMRswGQYDVQQDDBIqLnNyYXZhbi5rYWZrYS5j
+      b20xKTAnBgkqhkiG9w0BCQEWGnNkb21tYXJhanVAc3RhdGVzdHJlZXQuY29tMB4X
+      DTIwMDcwOTA5NTUyNloXDTIxMDcwOTA5NTUyNlowgZMxCzAJBgNVBAYTAklOMQsw
+      CQYDVQQIDAJLQTESMBAGA1UEBwwJQmFuZ2Fsb3JlMQswCQYDVQQKDAJTUzEOMAwG
+      A1UECwwFQWxwaGExGzAZBgNVBAMMEiouc3JhdmFuLmthZmthLmNvbTEpMCcGCSqG
+      SIb3DQEJARYac2RvbW1hcmFqdUBzdGF0ZXN0cmVldC5jb20wggEiMA0GCSqGSIb3
+      DQEBAQUAA4IBDwAwggEKAoIBAQDC/JdLo4ctmae8BJ2d/J8a5jSHMODSncV71LGq
+      VWF3wujodypSPICS4PeuuoTGL+HyD5Ki/uOO/H2aGoQZiLM48UIfexqFNU3G3rxa
+      6ric+xulCmGj/mEf70w0Bo7vVcSmW2XG8DayP9lDwMVzTqyNzVmhsRexWX/JlwSy
+      j0o5HayXLCnWYGgZJN9w4klgxlQuTiZE0CUtaGAN3KKtS0NLgTdIwLPhXrcHs6Df
+      uRU83VsLhppwoX8p/2gKr2urBGgvdbaUxYqZ5fliEgeWYbYRP6dDK2G0+UoueGPI
+      Tq36n+JZNHjkf8sVdcrH//seR9Ls7SiwFqF+UPFME7S73+BbAgMBAAGjQDA+MB0G
+      A1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAdBgNVHREEFjAUghIqLnNyYXZh
+      bi5rYWZrYS5jb20wDQYJKoZIhvcNAQEFBQADggEBACA3et9uuYRTTTvjQbZqe5vN
+      RJI3lY/Y4gggaekKZ5H4LlFVZ64cnLr4okwtPXoM0amzGy5vffUeNeOgvRr5leia
+      XXPNdBR4jUZlZKHRpdwYxKB61CCx8G5ShUU8OYJDcphLT0ktNPPYDKrlWSLBC7ye
+      wZB/GoA2STEPADDM5kzp8G9sETskPMgqGC+OpU4kKzKxRcH+oCFbEWUX2Hk8GNAM
+      7ueyBqZEvwFN94aGwGvvTZjKYKa8diPuz6uygEQjq5OXjRmkLveSXGUnz+X2+muC
+      8vIV4hDbRxMcZey9xvUUAS3pqzoA5qHyFh9+Wf8dKamGrklJxXhWVL4G70ESIZI=
+      -----END CERTIFICATE-----
+    privkey: |-
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEowIBAAKCAQEAwvyXS6OHLZmnvASdnfyfGuY0hzDg0p3Fe9SxqlVhd8Lo6Hcq
+      UjyAkuD3rrqExi/h8g+Sov7jjvx9mhqEGYizOPFCH3sahTVNxt68Wuq4nPsbpQph
+      o/5hH+9MNAaO71XEpltlxvA2sj/ZQ8DFc06sjc1ZobEXsVl/yZcEso9KOR2slywp
+      1mBoGSTfcOJJYMZULk4mRNAlLWhgDdyirUtDS4E3SMCz4V63B7Og37kVPN1bC4aa
+      cKF/Kf9oCq9rqwRoL3W2lMWKmeX5YhIHlmG2ET+nQythtPlKLnhjyE6t+p/iWTR4
+      5H/LFXXKx//7HkfS7O0osBahflDxTBO0u9/gWwIDAQABAoIBADkOQpNOiZqtUKiy
+      zRBSwJfVbt90TQU0R3pBta87BqdNsGt9mzOvIoxYKgHF8F4x2rLDHcx2O0420eYL
+      BkaWeqMZ7ZhapFsASv77ZDBSaKz+yYsUq5eaMv9uPWUn2iFsfnuTWQfKeKbWChRK
+      Tzy7c8CWqzimImGx57OsbiJ1zWlCosMmKWdXkje2rwAM2kPr3hHDAEOr27O+8nyp
+      m/JFJJc7Z0fETfVmvSiCxLYF5kFOnFgfsWsvHxzXPXGzEtDQxv8dCSt2CfC6f6k5
+      ik9BL0Fy76D4xgVS8lgk1idMWrzhE6gwMNAYOtdjUFoCifPO/I/0S8CxgPoI1GGz
+      MVtmQhECgYEA/ql/07tuMvU7PmX1OgORG1iTfQKWpFlNGCb2zBtLFa4ERiHnmn/A
+      8Aiw3DG0hQPWzIKxaUT5lDTbv1MBOp1FVebsGXRsmGvaVHYISSY+lm8yPtRMINqq
+      6UPUrLAI9dqjE/6V4iQzOr3gZN9Tl/SqdvAruz+IvKGZyjFHfyJWeQMCgYEAxALV
+      N8uqMaAn9fzsrpkNGBShVk9zwTRLCqkTZ5XsmLmkUM+Mi2AIIySoKdf+SRTZyazx
+      NH8D528RO7HCgJ39wynSAN2qL0T8s31la4BdBrAiI26Bm6B6Mgu+UQK/Fz/GVWs9
+      zmaT49+7NPPckMkxfeij2Wworw6k/ftP8/5Gn8kCgYEAt03AQeKG1s0n4Kk5E5If
+      r6RZPUFQt2nEEV9yg8YdjLReRTEAaXgNo3lN/KEWhCwYP8rO8qwATcqiZhvUJaGw
+      l72JMmVYCXqQg/0Vx7lskZHmg80CIx/ip9b4TXjEalr+yVSWBFn0OhMUYudRX25w
+      CP6lK7n2rXhQn3ZLNVq9DYsCgYA9r6qMibMBNSb+Wl/ePtqJFo0DzbNfPWbUbwtl
+      USCJm/rjV74iatGExdeKe6hSNZaoyp2KaOLApgqlX7cXpSEkl3e4wAn8IFjq3+7Y
+      GyirnyjPP8rYQHPUZi+57QRYe8CeR0bHOy8VyuZursReaIMD3gAav9g554DzUXED
+      F6YASQKBgH+VDJRwavO++xehC2wP5zHgBFYyPHPlMDP6Pubvnk5SmWbNd8J2TGk7
+      +NYkJx7NTzMAoTYldmfzqe7uV/gddatBBSer9+MApeRFlnHJUhQKoFUfxhZgzd4X
+      id5Ib3k40CDzxIn5J2RPIAvAipen+oyAi7/amJcQIuCstlnNjj+X
+      -----END RSA PRIVATE KEY-----
+    cacerts: |-
+      -----BEGIN CERTIFICATE-----
+      MIIDpDCCAowCCQDpSMOLnqu2KTANBgkqhkiG9w0BAQsFADCBkzELMAkGA1UEBhMC
+      SU4xCzAJBgNVBAgMAktBMRIwEAYDVQQHDAlCYW5nYWxvcmUxCzAJBgNVBAoMAlNT
+      MQ4wDAYDVQQLDAVBbHBoYTEbMBkGA1UEAwwSKi5zcmF2YW4ua2Fma2EuY29tMSkw
+      JwYJKoZIhvcNAQkBFhpzZG9tbWFyYWp1QHN0YXRlc3RyZWV0LmNvbTAeFw0yMDA3
+      MDkwODAzMzRaFw0yMjA5MTcwODAzMzRaMIGTMQswCQYDVQQGEwJJTjELMAkGA1UE
+      CAwCS0ExEjAQBgNVBAcMCUJhbmdhbG9yZTELMAkGA1UECgwCU1MxDjAMBgNVBAsM
+      BUFscGhhMRswGQYDVQQDDBIqLnNyYXZhbi5rYWZrYS5jb20xKTAnBgkqhkiG9w0B
+      CQEWGnNkb21tYXJhanVAc3RhdGVzdHJlZXQuY29tMIIBIjANBgkqhkiG9w0BAQEF
+      AAOCAQ8AMIIBCgKCAQEA1Hf36992uMU80Uqb+FNgeQeozDe0lEwSTdgiC0u/0YTP
+      PP54UAgwvP0Jf6hYgNkktgGHw3W1xY0bs3gcyKkqKDCLXumJvenifkgGYfDXZB9U
+      CYFtJdwOeQZSqK1JkZPqkXWw9/i9kghvvu0n3EYS39MlJG4x/JzTMQ6GtEeDKpBR
+      JRHM7iO8hEHeQYyCasb6TDydSXYUvDE6a59Iqt/yRbAg8R2/4QYMxKWrw5gyZF7f
+      YCgi0ZYLzrj5ksgtDccrmgOaN0dZhQpCUouEjgqYb9mkNZnojK8Gi/LVlQsAxPoM
+      713qVNZ/8cwiaCLlyJ9m/7aawt38f9y5vJCKoa1ZmQIDAQABMA0GCSqGSIb3DQEB
+      CwUAA4IBAQDACHJk4dGJZusYJdo2ItLloFQ6GETAPw3ctkWLsZz92zIzQbNIvTOc
+      HXR5y2LpDAIyVr45lPV0AI+UZrv3WGCmT0YPGSWi8+7WPBcQF5cfB2Lbc6Y3bK0q
+      Anaekl6hD+RXGx4mvDb71kOHS6k7IoQZ0bzHKun8+fNEZDYJRgtd7pLjeZW4PhL6
+      CJi8Y1CQ0qkKVUUY/3DbvSPE+18cJsglnPKHYZYl9IULN0DB1SwbqJc41woMUPdH
+      lDBk8Ta+xZgSnEGD2NSQBW+8v9URK6WCB1qe41/he1xGun6kGJxjbNI0bCLesgPR
+      aSmoPMAxXsFBKQWQEavDd1FunM+xLejz
+      -----END CERTIFICATE-----
+  loadBalancer:
+    enabled: false
+    domain: ""
+  dependencies:
+    kafka:
+      bootstrapEndpoint: kafka-hub0:9071
+      brokerCount: 3
+      tls:
+        enabled: true
+        internal: false
+        authentication:
+           type: tls
+    schemaRegistry:
+      enabled: true
+      url: http://schemaregistry:9081
+      tls:
+        enabled: true
+        authentication:
+           type: tls
+
+## Replicator Connect Cluster
+##
+replicator:
+  name: replicator-hub0
+  replicas: 2
+  tls:
+    enabled: true
+    port: 443
+    authentication:
+      type: tls
+    fullchain: |-
+      -----BEGIN CERTIFICATE-----
+      MIID6zCCAtOgAwIBAgIJANjKClqA7cZeMA0GCSqGSIb3DQEBBQUAMIGTMQswCQYD
+      VQQGEwJJTjELMAkGA1UECAwCS0ExEjAQBgNVBAcMCUJhbmdhbG9yZTELMAkGA1UE
+      CgwCU1MxDjAMBgNVBAsMBUFscGhhMRswGQYDVQQDDBIqLnNyYXZhbi5rYWZrYS5j
+      b20xKTAnBgkqhkiG9w0BCQEWGnNkb21tYXJhanVAc3RhdGVzdHJlZXQuY29tMB4X
+      DTIwMDcwOTA5NTUyNloXDTIxMDcwOTA5NTUyNlowgZMxCzAJBgNVBAYTAklOMQsw
+      CQYDVQQIDAJLQTESMBAGA1UEBwwJQmFuZ2Fsb3JlMQswCQYDVQQKDAJTUzEOMAwG
+      A1UECwwFQWxwaGExGzAZBgNVBAMMEiouc3JhdmFuLmthZmthLmNvbTEpMCcGCSqG
+      SIb3DQEJARYac2RvbW1hcmFqdUBzdGF0ZXN0cmVldC5jb20wggEiMA0GCSqGSIb3
+      DQEBAQUAA4IBDwAwggEKAoIBAQDC/JdLo4ctmae8BJ2d/J8a5jSHMODSncV71LGq
+      VWF3wujodypSPICS4PeuuoTGL+HyD5Ki/uOO/H2aGoQZiLM48UIfexqFNU3G3rxa
+      6ric+xulCmGj/mEf70w0Bo7vVcSmW2XG8DayP9lDwMVzTqyNzVmhsRexWX/JlwSy
+      j0o5HayXLCnWYGgZJN9w4klgxlQuTiZE0CUtaGAN3KKtS0NLgTdIwLPhXrcHs6Df
+      uRU83VsLhppwoX8p/2gKr2urBGgvdbaUxYqZ5fliEgeWYbYRP6dDK2G0+UoueGPI
+      Tq36n+JZNHjkf8sVdcrH//seR9Ls7SiwFqF+UPFME7S73+BbAgMBAAGjQDA+MB0G
+      A1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAdBgNVHREEFjAUghIqLnNyYXZh
+      bi5rYWZrYS5jb20wDQYJKoZIhvcNAQEFBQADggEBACA3et9uuYRTTTvjQbZqe5vN
+      RJI3lY/Y4gggaekKZ5H4LlFVZ64cnLr4okwtPXoM0amzGy5vffUeNeOgvRr5leia
+      XXPNdBR4jUZlZKHRpdwYxKB61CCx8G5ShUU8OYJDcphLT0ktNPPYDKrlWSLBC7ye
+      wZB/GoA2STEPADDM5kzp8G9sETskPMgqGC+OpU4kKzKxRcH+oCFbEWUX2Hk8GNAM
+      7ueyBqZEvwFN94aGwGvvTZjKYKa8diPuz6uygEQjq5OXjRmkLveSXGUnz+X2+muC
+      8vIV4hDbRxMcZey9xvUUAS3pqzoA5qHyFh9+Wf8dKamGrklJxXhWVL4G70ESIZI=
+      -----END CERTIFICATE-----
+    privkey: |-
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEowIBAAKCAQEAwvyXS6OHLZmnvASdnfyfGuY0hzDg0p3Fe9SxqlVhd8Lo6Hcq
+      UjyAkuD3rrqExi/h8g+Sov7jjvx9mhqEGYizOPFCH3sahTVNxt68Wuq4nPsbpQph
+      o/5hH+9MNAaO71XEpltlxvA2sj/ZQ8DFc06sjc1ZobEXsVl/yZcEso9KOR2slywp
+      1mBoGSTfcOJJYMZULk4mRNAlLWhgDdyirUtDS4E3SMCz4V63B7Og37kVPN1bC4aa
+      cKF/Kf9oCq9rqwRoL3W2lMWKmeX5YhIHlmG2ET+nQythtPlKLnhjyE6t+p/iWTR4
+      5H/LFXXKx//7HkfS7O0osBahflDxTBO0u9/gWwIDAQABAoIBADkOQpNOiZqtUKiy
+      zRBSwJfVbt90TQU0R3pBta87BqdNsGt9mzOvIoxYKgHF8F4x2rLDHcx2O0420eYL
+      BkaWeqMZ7ZhapFsASv77ZDBSaKz+yYsUq5eaMv9uPWUn2iFsfnuTWQfKeKbWChRK
+      Tzy7c8CWqzimImGx57OsbiJ1zWlCosMmKWdXkje2rwAM2kPr3hHDAEOr27O+8nyp
+      m/JFJJc7Z0fETfVmvSiCxLYF5kFOnFgfsWsvHxzXPXGzEtDQxv8dCSt2CfC6f6k5
+      ik9BL0Fy76D4xgVS8lgk1idMWrzhE6gwMNAYOtdjUFoCifPO/I/0S8CxgPoI1GGz
+      MVtmQhECgYEA/ql/07tuMvU7PmX1OgORG1iTfQKWpFlNGCb2zBtLFa4ERiHnmn/A
+      8Aiw3DG0hQPWzIKxaUT5lDTbv1MBOp1FVebsGXRsmGvaVHYISSY+lm8yPtRMINqq
+      6UPUrLAI9dqjE/6V4iQzOr3gZN9Tl/SqdvAruz+IvKGZyjFHfyJWeQMCgYEAxALV
+      N8uqMaAn9fzsrpkNGBShVk9zwTRLCqkTZ5XsmLmkUM+Mi2AIIySoKdf+SRTZyazx
+      NH8D528RO7HCgJ39wynSAN2qL0T8s31la4BdBrAiI26Bm6B6Mgu+UQK/Fz/GVWs9
+      zmaT49+7NPPckMkxfeij2Wworw6k/ftP8/5Gn8kCgYEAt03AQeKG1s0n4Kk5E5If
+      r6RZPUFQt2nEEV9yg8YdjLReRTEAaXgNo3lN/KEWhCwYP8rO8qwATcqiZhvUJaGw
+      l72JMmVYCXqQg/0Vx7lskZHmg80CIx/ip9b4TXjEalr+yVSWBFn0OhMUYudRX25w
+      CP6lK7n2rXhQn3ZLNVq9DYsCgYA9r6qMibMBNSb+Wl/ePtqJFo0DzbNfPWbUbwtl
+      USCJm/rjV74iatGExdeKe6hSNZaoyp2KaOLApgqlX7cXpSEkl3e4wAn8IFjq3+7Y
+      GyirnyjPP8rYQHPUZi+57QRYe8CeR0bHOy8VyuZursReaIMD3gAav9g554DzUXED
+      F6YASQKBgH+VDJRwavO++xehC2wP5zHgBFYyPHPlMDP6Pubvnk5SmWbNd8J2TGk7
+      +NYkJx7NTzMAoTYldmfzqe7uV/gddatBBSer9+MApeRFlnHJUhQKoFUfxhZgzd4X
+      id5Ib3k40CDzxIn5J2RPIAvAipen+oyAi7/amJcQIuCstlnNjj+X
+      -----END RSA PRIVATE KEY-----
+    cacerts: |-
+      -----BEGIN CERTIFICATE-----
+      MIIDpDCCAowCCQDpSMOLnqu2KTANBgkqhkiG9w0BAQsFADCBkzELMAkGA1UEBhMC
+      SU4xCzAJBgNVBAgMAktBMRIwEAYDVQQHDAlCYW5nYWxvcmUxCzAJBgNVBAoMAlNT
+      MQ4wDAYDVQQLDAVBbHBoYTEbMBkGA1UEAwwSKi5zcmF2YW4ua2Fma2EuY29tMSkw
+      JwYJKoZIhvcNAQkBFhpzZG9tbWFyYWp1QHN0YXRlc3RyZWV0LmNvbTAeFw0yMDA3
+      MDkwODAzMzRaFw0yMjA5MTcwODAzMzRaMIGTMQswCQYDVQQGEwJJTjELMAkGA1UE
+      CAwCS0ExEjAQBgNVBAcMCUJhbmdhbG9yZTELMAkGA1UECgwCU1MxDjAMBgNVBAsM
+      BUFscGhhMRswGQYDVQQDDBIqLnNyYXZhbi5rYWZrYS5jb20xKTAnBgkqhkiG9w0B
+      CQEWGnNkb21tYXJhanVAc3RhdGVzdHJlZXQuY29tMIIBIjANBgkqhkiG9w0BAQEF
+      AAOCAQ8AMIIBCgKCAQEA1Hf36992uMU80Uqb+FNgeQeozDe0lEwSTdgiC0u/0YTP
+      PP54UAgwvP0Jf6hYgNkktgGHw3W1xY0bs3gcyKkqKDCLXumJvenifkgGYfDXZB9U
+      CYFtJdwOeQZSqK1JkZPqkXWw9/i9kghvvu0n3EYS39MlJG4x/JzTMQ6GtEeDKpBR
+      JRHM7iO8hEHeQYyCasb6TDydSXYUvDE6a59Iqt/yRbAg8R2/4QYMxKWrw5gyZF7f
+      YCgi0ZYLzrj5ksgtDccrmgOaN0dZhQpCUouEjgqYb9mkNZnojK8Gi/LVlQsAxPoM
+      713qVNZ/8cwiaCLlyJ9m/7aawt38f9y5vJCKoa1ZmQIDAQABMA0GCSqGSIb3DQEB
+      CwUAA4IBAQDACHJk4dGJZusYJdo2ItLloFQ6GETAPw3ctkWLsZz92zIzQbNIvTOc
+      HXR5y2LpDAIyVr45lPV0AI+UZrv3WGCmT0YPGSWi8+7WPBcQF5cfB2Lbc6Y3bK0q
+      Anaekl6hD+RXGx4mvDb71kOHS6k7IoQZ0bzHKun8+fNEZDYJRgtd7pLjeZW4PhL6
+      CJi8Y1CQ0qkKVUUY/3DbvSPE+18cJsglnPKHYZYl9IULN0DB1SwbqJc41woMUPdH
+      lDBk8Ta+xZgSnEGD2NSQBW+8v9URK6WCB1qe41/he1xGun6kGJxjbNI0bCLesgPR
+      aSmoPMAxXsFBKQWQEavDd1FunM+xLejz
+      -----END CERTIFICATE-----
+  loadBalancer:
+    enabled: false
+    domain: ""
+  dependencies:
+    kafka:
+      brokerCount: 3
+      bootstrapEndpoint: kafka-hub0:9071
+      tls:
+        enabled: true
+        internal: false
+        authentication:
+           type: tls
+##
+## Schema Registry
+##
+schemaregistry:
+  name: schemaregistry
+  tls:
+    enabled: true
+    port: 443
+    authentication:
+      type: tls
+    fullchain: |-
+      -----BEGIN CERTIFICATE-----
+      MIID6zCCAtOgAwIBAgIJANjKClqA7cZeMA0GCSqGSIb3DQEBBQUAMIGTMQswCQYD
+      VQQGEwJJTjELMAkGA1UECAwCS0ExEjAQBgNVBAcMCUJhbmdhbG9yZTELMAkGA1UE
+      CgwCU1MxDjAMBgNVBAsMBUFscGhhMRswGQYDVQQDDBIqLnNyYXZhbi5rYWZrYS5j
+      b20xKTAnBgkqhkiG9w0BCQEWGnNkb21tYXJhanVAc3RhdGVzdHJlZXQuY29tMB4X
+      DTIwMDcwOTA5NTUyNloXDTIxMDcwOTA5NTUyNlowgZMxCzAJBgNVBAYTAklOMQsw
+      CQYDVQQIDAJLQTESMBAGA1UEBwwJQmFuZ2Fsb3JlMQswCQYDVQQKDAJTUzEOMAwG
+      A1UECwwFQWxwaGExGzAZBgNVBAMMEiouc3JhdmFuLmthZmthLmNvbTEpMCcGCSqG
+      SIb3DQEJARYac2RvbW1hcmFqdUBzdGF0ZXN0cmVldC5jb20wggEiMA0GCSqGSIb3
+      DQEBAQUAA4IBDwAwggEKAoIBAQDC/JdLo4ctmae8BJ2d/J8a5jSHMODSncV71LGq
+      VWF3wujodypSPICS4PeuuoTGL+HyD5Ki/uOO/H2aGoQZiLM48UIfexqFNU3G3rxa
+      6ric+xulCmGj/mEf70w0Bo7vVcSmW2XG8DayP9lDwMVzTqyNzVmhsRexWX/JlwSy
+      j0o5HayXLCnWYGgZJN9w4klgxlQuTiZE0CUtaGAN3KKtS0NLgTdIwLPhXrcHs6Df
+      uRU83VsLhppwoX8p/2gKr2urBGgvdbaUxYqZ5fliEgeWYbYRP6dDK2G0+UoueGPI
+      Tq36n+JZNHjkf8sVdcrH//seR9Ls7SiwFqF+UPFME7S73+BbAgMBAAGjQDA+MB0G
+      A1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAdBgNVHREEFjAUghIqLnNyYXZh
+      bi5rYWZrYS5jb20wDQYJKoZIhvcNAQEFBQADggEBACA3et9uuYRTTTvjQbZqe5vN
+      RJI3lY/Y4gggaekKZ5H4LlFVZ64cnLr4okwtPXoM0amzGy5vffUeNeOgvRr5leia
+      XXPNdBR4jUZlZKHRpdwYxKB61CCx8G5ShUU8OYJDcphLT0ktNPPYDKrlWSLBC7ye
+      wZB/GoA2STEPADDM5kzp8G9sETskPMgqGC+OpU4kKzKxRcH+oCFbEWUX2Hk8GNAM
+      7ueyBqZEvwFN94aGwGvvTZjKYKa8diPuz6uygEQjq5OXjRmkLveSXGUnz+X2+muC
+      8vIV4hDbRxMcZey9xvUUAS3pqzoA5qHyFh9+Wf8dKamGrklJxXhWVL4G70ESIZI=
+      -----END CERTIFICATE-----
+    privkey: |-
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEowIBAAKCAQEAwvyXS6OHLZmnvASdnfyfGuY0hzDg0p3Fe9SxqlVhd8Lo6Hcq
+      UjyAkuD3rrqExi/h8g+Sov7jjvx9mhqEGYizOPFCH3sahTVNxt68Wuq4nPsbpQph
+      o/5hH+9MNAaO71XEpltlxvA2sj/ZQ8DFc06sjc1ZobEXsVl/yZcEso9KOR2slywp
+      1mBoGSTfcOJJYMZULk4mRNAlLWhgDdyirUtDS4E3SMCz4V63B7Og37kVPN1bC4aa
+      cKF/Kf9oCq9rqwRoL3W2lMWKmeX5YhIHlmG2ET+nQythtPlKLnhjyE6t+p/iWTR4
+      5H/LFXXKx//7HkfS7O0osBahflDxTBO0u9/gWwIDAQABAoIBADkOQpNOiZqtUKiy
+      zRBSwJfVbt90TQU0R3pBta87BqdNsGt9mzOvIoxYKgHF8F4x2rLDHcx2O0420eYL
+      BkaWeqMZ7ZhapFsASv77ZDBSaKz+yYsUq5eaMv9uPWUn2iFsfnuTWQfKeKbWChRK
+      Tzy7c8CWqzimImGx57OsbiJ1zWlCosMmKWdXkje2rwAM2kPr3hHDAEOr27O+8nyp
+      m/JFJJc7Z0fETfVmvSiCxLYF5kFOnFgfsWsvHxzXPXGzEtDQxv8dCSt2CfC6f6k5
+      ik9BL0Fy76D4xgVS8lgk1idMWrzhE6gwMNAYOtdjUFoCifPO/I/0S8CxgPoI1GGz
+      MVtmQhECgYEA/ql/07tuMvU7PmX1OgORG1iTfQKWpFlNGCb2zBtLFa4ERiHnmn/A
+      8Aiw3DG0hQPWzIKxaUT5lDTbv1MBOp1FVebsGXRsmGvaVHYISSY+lm8yPtRMINqq
+      6UPUrLAI9dqjE/6V4iQzOr3gZN9Tl/SqdvAruz+IvKGZyjFHfyJWeQMCgYEAxALV
+      N8uqMaAn9fzsrpkNGBShVk9zwTRLCqkTZ5XsmLmkUM+Mi2AIIySoKdf+SRTZyazx
+      NH8D528RO7HCgJ39wynSAN2qL0T8s31la4BdBrAiI26Bm6B6Mgu+UQK/Fz/GVWs9
+      zmaT49+7NPPckMkxfeij2Wworw6k/ftP8/5Gn8kCgYEAt03AQeKG1s0n4Kk5E5If
+      r6RZPUFQt2nEEV9yg8YdjLReRTEAaXgNo3lN/KEWhCwYP8rO8qwATcqiZhvUJaGw
+      l72JMmVYCXqQg/0Vx7lskZHmg80CIx/ip9b4TXjEalr+yVSWBFn0OhMUYudRX25w
+      CP6lK7n2rXhQn3ZLNVq9DYsCgYA9r6qMibMBNSb+Wl/ePtqJFo0DzbNfPWbUbwtl
+      USCJm/rjV74iatGExdeKe6hSNZaoyp2KaOLApgqlX7cXpSEkl3e4wAn8IFjq3+7Y
+      GyirnyjPP8rYQHPUZi+57QRYe8CeR0bHOy8VyuZursReaIMD3gAav9g554DzUXED
+      F6YASQKBgH+VDJRwavO++xehC2wP5zHgBFYyPHPlMDP6Pubvnk5SmWbNd8J2TGk7
+      +NYkJx7NTzMAoTYldmfzqe7uV/gddatBBSer9+MApeRFlnHJUhQKoFUfxhZgzd4X
+      id5Ib3k40CDzxIn5J2RPIAvAipen+oyAi7/amJcQIuCstlnNjj+X
+      -----END RSA PRIVATE KEY-----
+    cacerts: |-
+      -----BEGIN CERTIFICATE-----
+      MIIDpDCCAowCCQDpSMOLnqu2KTANBgkqhkiG9w0BAQsFADCBkzELMAkGA1UEBhMC
+      SU4xCzAJBgNVBAgMAktBMRIwEAYDVQQHDAlCYW5nYWxvcmUxCzAJBgNVBAoMAlNT
+      MQ4wDAYDVQQLDAVBbHBoYTEbMBkGA1UEAwwSKi5zcmF2YW4ua2Fma2EuY29tMSkw
+      JwYJKoZIhvcNAQkBFhpzZG9tbWFyYWp1QHN0YXRlc3RyZWV0LmNvbTAeFw0yMDA3
+      MDkwODAzMzRaFw0yMjA5MTcwODAzMzRaMIGTMQswCQYDVQQGEwJJTjELMAkGA1UE
+      CAwCS0ExEjAQBgNVBAcMCUJhbmdhbG9yZTELMAkGA1UECgwCU1MxDjAMBgNVBAsM
+      BUFscGhhMRswGQYDVQQDDBIqLnNyYXZhbi5rYWZrYS5jb20xKTAnBgkqhkiG9w0B
+      CQEWGnNkb21tYXJhanVAc3RhdGVzdHJlZXQuY29tMIIBIjANBgkqhkiG9w0BAQEF
+      AAOCAQ8AMIIBCgKCAQEA1Hf36992uMU80Uqb+FNgeQeozDe0lEwSTdgiC0u/0YTP
+      PP54UAgwvP0Jf6hYgNkktgGHw3W1xY0bs3gcyKkqKDCLXumJvenifkgGYfDXZB9U
+      CYFtJdwOeQZSqK1JkZPqkXWw9/i9kghvvu0n3EYS39MlJG4x/JzTMQ6GtEeDKpBR
+      JRHM7iO8hEHeQYyCasb6TDydSXYUvDE6a59Iqt/yRbAg8R2/4QYMxKWrw5gyZF7f
+      YCgi0ZYLzrj5ksgtDccrmgOaN0dZhQpCUouEjgqYb9mkNZnojK8Gi/LVlQsAxPoM
+      713qVNZ/8cwiaCLlyJ9m/7aawt38f9y5vJCKoa1ZmQIDAQABMA0GCSqGSIb3DQEB
+      CwUAA4IBAQDACHJk4dGJZusYJdo2ItLloFQ6GETAPw3ctkWLsZz92zIzQbNIvTOc
+      HXR5y2LpDAIyVr45lPV0AI+UZrv3WGCmT0YPGSWi8+7WPBcQF5cfB2Lbc6Y3bK0q
+      Anaekl6hD+RXGx4mvDb71kOHS6k7IoQZ0bzHKun8+fNEZDYJRgtd7pLjeZW4PhL6
+      CJi8Y1CQ0qkKVUUY/3DbvSPE+18cJsglnPKHYZYl9IULN0DB1SwbqJc41woMUPdH
+      lDBk8Ta+xZgSnEGD2NSQBW+8v9URK6WCB1qe41/he1xGun6kGJxjbNI0bCLesgPR
+      aSmoPMAxXsFBKQWQEavDd1FunM+xLejz
+      -----END CERTIFICATE-----
+  loadBalancer:
+    enabled: true
+    type: internal
+    domain: "sravan.kafka.com"
+    prefix: "hub0-usw2-"
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+  dependencies:
+    kafka:
+      brokerCount: 3
+      bootstrapEndpoint: kafka-hub0:9071
+      tls:
+        enabled: true
+        internal: false
+        authentication:
+           type: tls
+##
+## KSQL
+##
+ksql:
+  name: ksql
+  replicas: 2
+  tls:
+    enabled: true
+    port: 443
+    authentication:
+      type: tls
+    fullchain: |-
+      -----BEGIN CERTIFICATE-----
+      MIID6zCCAtOgAwIBAgIJANjKClqA7cZeMA0GCSqGSIb3DQEBBQUAMIGTMQswCQYD
+      VQQGEwJJTjELMAkGA1UECAwCS0ExEjAQBgNVBAcMCUJhbmdhbG9yZTELMAkGA1UE
+      CgwCU1MxDjAMBgNVBAsMBUFscGhhMRswGQYDVQQDDBIqLnNyYXZhbi5rYWZrYS5j
+      b20xKTAnBgkqhkiG9w0BCQEWGnNkb21tYXJhanVAc3RhdGVzdHJlZXQuY29tMB4X
+      DTIwMDcwOTA5NTUyNloXDTIxMDcwOTA5NTUyNlowgZMxCzAJBgNVBAYTAklOMQsw
+      CQYDVQQIDAJLQTESMBAGA1UEBwwJQmFuZ2Fsb3JlMQswCQYDVQQKDAJTUzEOMAwG
+      A1UECwwFQWxwaGExGzAZBgNVBAMMEiouc3JhdmFuLmthZmthLmNvbTEpMCcGCSqG
+      SIb3DQEJARYac2RvbW1hcmFqdUBzdGF0ZXN0cmVldC5jb20wggEiMA0GCSqGSIb3
+      DQEBAQUAA4IBDwAwggEKAoIBAQDC/JdLo4ctmae8BJ2d/J8a5jSHMODSncV71LGq
+      VWF3wujodypSPICS4PeuuoTGL+HyD5Ki/uOO/H2aGoQZiLM48UIfexqFNU3G3rxa
+      6ric+xulCmGj/mEf70w0Bo7vVcSmW2XG8DayP9lDwMVzTqyNzVmhsRexWX/JlwSy
+      j0o5HayXLCnWYGgZJN9w4klgxlQuTiZE0CUtaGAN3KKtS0NLgTdIwLPhXrcHs6Df
+      uRU83VsLhppwoX8p/2gKr2urBGgvdbaUxYqZ5fliEgeWYbYRP6dDK2G0+UoueGPI
+      Tq36n+JZNHjkf8sVdcrH//seR9Ls7SiwFqF+UPFME7S73+BbAgMBAAGjQDA+MB0G
+      A1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAdBgNVHREEFjAUghIqLnNyYXZh
+      bi5rYWZrYS5jb20wDQYJKoZIhvcNAQEFBQADggEBACA3et9uuYRTTTvjQbZqe5vN
+      RJI3lY/Y4gggaekKZ5H4LlFVZ64cnLr4okwtPXoM0amzGy5vffUeNeOgvRr5leia
+      XXPNdBR4jUZlZKHRpdwYxKB61CCx8G5ShUU8OYJDcphLT0ktNPPYDKrlWSLBC7ye
+      wZB/GoA2STEPADDM5kzp8G9sETskPMgqGC+OpU4kKzKxRcH+oCFbEWUX2Hk8GNAM
+      7ueyBqZEvwFN94aGwGvvTZjKYKa8diPuz6uygEQjq5OXjRmkLveSXGUnz+X2+muC
+      8vIV4hDbRxMcZey9xvUUAS3pqzoA5qHyFh9+Wf8dKamGrklJxXhWVL4G70ESIZI=
+      -----END CERTIFICATE-----
+    privkey: |-
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEowIBAAKCAQEAwvyXS6OHLZmnvASdnfyfGuY0hzDg0p3Fe9SxqlVhd8Lo6Hcq
+      UjyAkuD3rrqExi/h8g+Sov7jjvx9mhqEGYizOPFCH3sahTVNxt68Wuq4nPsbpQph
+      o/5hH+9MNAaO71XEpltlxvA2sj/ZQ8DFc06sjc1ZobEXsVl/yZcEso9KOR2slywp
+      1mBoGSTfcOJJYMZULk4mRNAlLWhgDdyirUtDS4E3SMCz4V63B7Og37kVPN1bC4aa
+      cKF/Kf9oCq9rqwRoL3W2lMWKmeX5YhIHlmG2ET+nQythtPlKLnhjyE6t+p/iWTR4
+      5H/LFXXKx//7HkfS7O0osBahflDxTBO0u9/gWwIDAQABAoIBADkOQpNOiZqtUKiy
+      zRBSwJfVbt90TQU0R3pBta87BqdNsGt9mzOvIoxYKgHF8F4x2rLDHcx2O0420eYL
+      BkaWeqMZ7ZhapFsASv77ZDBSaKz+yYsUq5eaMv9uPWUn2iFsfnuTWQfKeKbWChRK
+      Tzy7c8CWqzimImGx57OsbiJ1zWlCosMmKWdXkje2rwAM2kPr3hHDAEOr27O+8nyp
+      m/JFJJc7Z0fETfVmvSiCxLYF5kFOnFgfsWsvHxzXPXGzEtDQxv8dCSt2CfC6f6k5
+      ik9BL0Fy76D4xgVS8lgk1idMWrzhE6gwMNAYOtdjUFoCifPO/I/0S8CxgPoI1GGz
+      MVtmQhECgYEA/ql/07tuMvU7PmX1OgORG1iTfQKWpFlNGCb2zBtLFa4ERiHnmn/A
+      8Aiw3DG0hQPWzIKxaUT5lDTbv1MBOp1FVebsGXRsmGvaVHYISSY+lm8yPtRMINqq
+      6UPUrLAI9dqjE/6V4iQzOr3gZN9Tl/SqdvAruz+IvKGZyjFHfyJWeQMCgYEAxALV
+      N8uqMaAn9fzsrpkNGBShVk9zwTRLCqkTZ5XsmLmkUM+Mi2AIIySoKdf+SRTZyazx
+      NH8D528RO7HCgJ39wynSAN2qL0T8s31la4BdBrAiI26Bm6B6Mgu+UQK/Fz/GVWs9
+      zmaT49+7NPPckMkxfeij2Wworw6k/ftP8/5Gn8kCgYEAt03AQeKG1s0n4Kk5E5If
+      r6RZPUFQt2nEEV9yg8YdjLReRTEAaXgNo3lN/KEWhCwYP8rO8qwATcqiZhvUJaGw
+      l72JMmVYCXqQg/0Vx7lskZHmg80CIx/ip9b4TXjEalr+yVSWBFn0OhMUYudRX25w
+      CP6lK7n2rXhQn3ZLNVq9DYsCgYA9r6qMibMBNSb+Wl/ePtqJFo0DzbNfPWbUbwtl
+      USCJm/rjV74iatGExdeKe6hSNZaoyp2KaOLApgqlX7cXpSEkl3e4wAn8IFjq3+7Y
+      GyirnyjPP8rYQHPUZi+57QRYe8CeR0bHOy8VyuZursReaIMD3gAav9g554DzUXED
+      F6YASQKBgH+VDJRwavO++xehC2wP5zHgBFYyPHPlMDP6Pubvnk5SmWbNd8J2TGk7
+      +NYkJx7NTzMAoTYldmfzqe7uV/gddatBBSer9+MApeRFlnHJUhQKoFUfxhZgzd4X
+      id5Ib3k40CDzxIn5J2RPIAvAipen+oyAi7/amJcQIuCstlnNjj+X
+      -----END RSA PRIVATE KEY-----
+    cacerts: |-
+      -----BEGIN CERTIFICATE-----
+      MIIDpDCCAowCCQDpSMOLnqu2KTANBgkqhkiG9w0BAQsFADCBkzELMAkGA1UEBhMC
+      SU4xCzAJBgNVBAgMAktBMRIwEAYDVQQHDAlCYW5nYWxvcmUxCzAJBgNVBAoMAlNT
+      MQ4wDAYDVQQLDAVBbHBoYTEbMBkGA1UEAwwSKi5zcmF2YW4ua2Fma2EuY29tMSkw
+      JwYJKoZIhvcNAQkBFhpzZG9tbWFyYWp1QHN0YXRlc3RyZWV0LmNvbTAeFw0yMDA3
+      MDkwODAzMzRaFw0yMjA5MTcwODAzMzRaMIGTMQswCQYDVQQGEwJJTjELMAkGA1UE
+      CAwCS0ExEjAQBgNVBAcMCUJhbmdhbG9yZTELMAkGA1UECgwCU1MxDjAMBgNVBAsM
+      BUFscGhhMRswGQYDVQQDDBIqLnNyYXZhbi5rYWZrYS5jb20xKTAnBgkqhkiG9w0B
+      CQEWGnNkb21tYXJhanVAc3RhdGVzdHJlZXQuY29tMIIBIjANBgkqhkiG9w0BAQEF
+      AAOCAQ8AMIIBCgKCAQEA1Hf36992uMU80Uqb+FNgeQeozDe0lEwSTdgiC0u/0YTP
+      PP54UAgwvP0Jf6hYgNkktgGHw3W1xY0bs3gcyKkqKDCLXumJvenifkgGYfDXZB9U
+      CYFtJdwOeQZSqK1JkZPqkXWw9/i9kghvvu0n3EYS39MlJG4x/JzTMQ6GtEeDKpBR
+      JRHM7iO8hEHeQYyCasb6TDydSXYUvDE6a59Iqt/yRbAg8R2/4QYMxKWrw5gyZF7f
+      YCgi0ZYLzrj5ksgtDccrmgOaN0dZhQpCUouEjgqYb9mkNZnojK8Gi/LVlQsAxPoM
+      713qVNZ/8cwiaCLlyJ9m/7aawt38f9y5vJCKoa1ZmQIDAQABMA0GCSqGSIb3DQEB
+      CwUAA4IBAQDACHJk4dGJZusYJdo2ItLloFQ6GETAPw3ctkWLsZz92zIzQbNIvTOc
+      HXR5y2LpDAIyVr45lPV0AI+UZrv3WGCmT0YPGSWi8+7WPBcQF5cfB2Lbc6Y3bK0q
+      Anaekl6hD+RXGx4mvDb71kOHS6k7IoQZ0bzHKun8+fNEZDYJRgtd7pLjeZW4PhL6
+      CJi8Y1CQ0qkKVUUY/3DbvSPE+18cJsglnPKHYZYl9IULN0DB1SwbqJc41woMUPdH
+      lDBk8Ta+xZgSnEGD2NSQBW+8v9URK6WCB1qe41/he1xGun6kGJxjbNI0bCLesgPR
+      aSmoPMAxXsFBKQWQEavDd1FunM+xLejz
+      -----END CERTIFICATE-----
+  loadBalancer:
+    enabled: true
+    type: internal
+    domain: "sravan.kafka.com"
+    prefix: "ksql-hub0-usw2"
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+  dependencies:
+    kafka:
+      brokerCount: 3
+      bootstrapEndpoint: kafka-hub0:9071
+      brokerEndpoints: kafka-hub0-0.kafka-hub0:9071,kafka-hub0-1.kafka-hub0:9071,kafka-hub0-2.kafka-hub0:9071
+      tls:
+        enabled: true
+        internal: false
+        authentication:
+           type: tls      
+    schemaRegistry:
+      enabled: true
+      tls:
+        enabled: true
+        authentication:
+          type: tls
+      url: http://schemaregistry:9081
+
+## External DNS
+externaldns:
+  enabled: false
+  name: external-dns
+
+## Control Center (C3) Resource configuration
+##
+controlcenter:
+  name: controlcenter
+  license: ""
+  ##
+  ## C3 dependencies
+  ##
+  dependencies:
+    c3KafkaCluster:
+      brokerCount: 3
+      bootstrapEndpoint: kafka-hub0:9071
+      tls:
+        enabled: true
+        internal: false
+        authentication:
+           type: tls      
+      zookeeper:
+        endpoint: zk-hub0:2181
+    connectCluster:
+      enabled: true
+      url: http://connectors:9083
+      tls:
+        enabled: true
+        authentication:
+           type: tls      
+    ksql:
+      enabled: true
+      url: http://ksql:9088
+      tls:
+        enabled: true
+        authentication:
+           type: tls      
+    schemaRegistry:
+      enabled: true
+      url: http://schemaregistry:9081
+      tls:
+        enabled: true
+        authentication:
+           type: tls      
+    ##
+    ## Custom Settings for SSC
+    ##
+    monitoringKafkaClusters:
+    - name: kafka-spoke0
+      tls:
+        enabled: false
+        internal: false
+        authentication:
+          type: plain    
+      bootstrapEndpoint: "kafka-spoke0.kafka-spoke0.svc.cluster.local:9071"
+  ##
+  ## C3 External Access
+  ##
+  loadBalancer:
+    enabled: true
+    type: internal
+    domain: "sravan.kafka.com"
+    prefix: "hub0-usw2-"
+    annotations:
+      service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+  ##
+  ## TLS configuration
+  ##
+  tls:
+    enabled: true
+    port: 443
+    authentication:
+      type: plain
+    fullchain: |-
+      -----BEGIN CERTIFICATE-----
+      MIID6zCCAtOgAwIBAgIJANjKClqA7cZeMA0GCSqGSIb3DQEBBQUAMIGTMQswCQYD
+      VQQGEwJJTjELMAkGA1UECAwCS0ExEjAQBgNVBAcMCUJhbmdhbG9yZTELMAkGA1UE
+      CgwCU1MxDjAMBgNVBAsMBUFscGhhMRswGQYDVQQDDBIqLnNyYXZhbi5rYWZrYS5j
+      b20xKTAnBgkqhkiG9w0BCQEWGnNkb21tYXJhanVAc3RhdGVzdHJlZXQuY29tMB4X
+      DTIwMDcwOTA5NTUyNloXDTIxMDcwOTA5NTUyNlowgZMxCzAJBgNVBAYTAklOMQsw
+      CQYDVQQIDAJLQTESMBAGA1UEBwwJQmFuZ2Fsb3JlMQswCQYDVQQKDAJTUzEOMAwG
+      A1UECwwFQWxwaGExGzAZBgNVBAMMEiouc3JhdmFuLmthZmthLmNvbTEpMCcGCSqG
+      SIb3DQEJARYac2RvbW1hcmFqdUBzdGF0ZXN0cmVldC5jb20wggEiMA0GCSqGSIb3
+      DQEBAQUAA4IBDwAwggEKAoIBAQDC/JdLo4ctmae8BJ2d/J8a5jSHMODSncV71LGq
+      VWF3wujodypSPICS4PeuuoTGL+HyD5Ki/uOO/H2aGoQZiLM48UIfexqFNU3G3rxa
+      6ric+xulCmGj/mEf70w0Bo7vVcSmW2XG8DayP9lDwMVzTqyNzVmhsRexWX/JlwSy
+      j0o5HayXLCnWYGgZJN9w4klgxlQuTiZE0CUtaGAN3KKtS0NLgTdIwLPhXrcHs6Df
+      uRU83VsLhppwoX8p/2gKr2urBGgvdbaUxYqZ5fliEgeWYbYRP6dDK2G0+UoueGPI
+      Tq36n+JZNHjkf8sVdcrH//seR9Ls7SiwFqF+UPFME7S73+BbAgMBAAGjQDA+MB0G
+      A1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAdBgNVHREEFjAUghIqLnNyYXZh
+      bi5rYWZrYS5jb20wDQYJKoZIhvcNAQEFBQADggEBACA3et9uuYRTTTvjQbZqe5vN
+      RJI3lY/Y4gggaekKZ5H4LlFVZ64cnLr4okwtPXoM0amzGy5vffUeNeOgvRr5leia
+      XXPNdBR4jUZlZKHRpdwYxKB61CCx8G5ShUU8OYJDcphLT0ktNPPYDKrlWSLBC7ye
+      wZB/GoA2STEPADDM5kzp8G9sETskPMgqGC+OpU4kKzKxRcH+oCFbEWUX2Hk8GNAM
+      7ueyBqZEvwFN94aGwGvvTZjKYKa8diPuz6uygEQjq5OXjRmkLveSXGUnz+X2+muC
+      8vIV4hDbRxMcZey9xvUUAS3pqzoA5qHyFh9+Wf8dKamGrklJxXhWVL4G70ESIZI=
+      -----END CERTIFICATE-----
+    privkey: |-
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEowIBAAKCAQEAwvyXS6OHLZmnvASdnfyfGuY0hzDg0p3Fe9SxqlVhd8Lo6Hcq
+      UjyAkuD3rrqExi/h8g+Sov7jjvx9mhqEGYizOPFCH3sahTVNxt68Wuq4nPsbpQph
+      o/5hH+9MNAaO71XEpltlxvA2sj/ZQ8DFc06sjc1ZobEXsVl/yZcEso9KOR2slywp
+      1mBoGSTfcOJJYMZULk4mRNAlLWhgDdyirUtDS4E3SMCz4V63B7Og37kVPN1bC4aa
+      cKF/Kf9oCq9rqwRoL3W2lMWKmeX5YhIHlmG2ET+nQythtPlKLnhjyE6t+p/iWTR4
+      5H/LFXXKx//7HkfS7O0osBahflDxTBO0u9/gWwIDAQABAoIBADkOQpNOiZqtUKiy
+      zRBSwJfVbt90TQU0R3pBta87BqdNsGt9mzOvIoxYKgHF8F4x2rLDHcx2O0420eYL
+      BkaWeqMZ7ZhapFsASv77ZDBSaKz+yYsUq5eaMv9uPWUn2iFsfnuTWQfKeKbWChRK
+      Tzy7c8CWqzimImGx57OsbiJ1zWlCosMmKWdXkje2rwAM2kPr3hHDAEOr27O+8nyp
+      m/JFJJc7Z0fETfVmvSiCxLYF5kFOnFgfsWsvHxzXPXGzEtDQxv8dCSt2CfC6f6k5
+      ik9BL0Fy76D4xgVS8lgk1idMWrzhE6gwMNAYOtdjUFoCifPO/I/0S8CxgPoI1GGz
+      MVtmQhECgYEA/ql/07tuMvU7PmX1OgORG1iTfQKWpFlNGCb2zBtLFa4ERiHnmn/A
+      8Aiw3DG0hQPWzIKxaUT5lDTbv1MBOp1FVebsGXRsmGvaVHYISSY+lm8yPtRMINqq
+      6UPUrLAI9dqjE/6V4iQzOr3gZN9Tl/SqdvAruz+IvKGZyjFHfyJWeQMCgYEAxALV
+      N8uqMaAn9fzsrpkNGBShVk9zwTRLCqkTZ5XsmLmkUM+Mi2AIIySoKdf+SRTZyazx
+      NH8D528RO7HCgJ39wynSAN2qL0T8s31la4BdBrAiI26Bm6B6Mgu+UQK/Fz/GVWs9
+      zmaT49+7NPPckMkxfeij2Wworw6k/ftP8/5Gn8kCgYEAt03AQeKG1s0n4Kk5E5If
+      r6RZPUFQt2nEEV9yg8YdjLReRTEAaXgNo3lN/KEWhCwYP8rO8qwATcqiZhvUJaGw
+      l72JMmVYCXqQg/0Vx7lskZHmg80CIx/ip9b4TXjEalr+yVSWBFn0OhMUYudRX25w
+      CP6lK7n2rXhQn3ZLNVq9DYsCgYA9r6qMibMBNSb+Wl/ePtqJFo0DzbNfPWbUbwtl
+      USCJm/rjV74iatGExdeKe6hSNZaoyp2KaOLApgqlX7cXpSEkl3e4wAn8IFjq3+7Y
+      GyirnyjPP8rYQHPUZi+57QRYe8CeR0bHOy8VyuZursReaIMD3gAav9g554DzUXED
+      F6YASQKBgH+VDJRwavO++xehC2wP5zHgBFYyPHPlMDP6Pubvnk5SmWbNd8J2TGk7
+      +NYkJx7NTzMAoTYldmfzqe7uV/gddatBBSer9+MApeRFlnHJUhQKoFUfxhZgzd4X
+      id5Ib3k40CDzxIn5J2RPIAvAipen+oyAi7/amJcQIuCstlnNjj+X
+      -----END RSA PRIVATE KEY-----
+    cacerts: |-
+      -----BEGIN CERTIFICATE-----
+      MIIDpDCCAowCCQDpSMOLnqu2KTANBgkqhkiG9w0BAQsFADCBkzELMAkGA1UEBhMC
+      SU4xCzAJBgNVBAgMAktBMRIwEAYDVQQHDAlCYW5nYWxvcmUxCzAJBgNVBAoMAlNT
+      MQ4wDAYDVQQLDAVBbHBoYTEbMBkGA1UEAwwSKi5zcmF2YW4ua2Fma2EuY29tMSkw
+      JwYJKoZIhvcNAQkBFhpzZG9tbWFyYWp1QHN0YXRlc3RyZWV0LmNvbTAeFw0yMDA3
+      MDkwODAzMzRaFw0yMjA5MTcwODAzMzRaMIGTMQswCQYDVQQGEwJJTjELMAkGA1UE
+      CAwCS0ExEjAQBgNVBAcMCUJhbmdhbG9yZTELMAkGA1UECgwCU1MxDjAMBgNVBAsM
+      BUFscGhhMRswGQYDVQQDDBIqLnNyYXZhbi5rYWZrYS5jb20xKTAnBgkqhkiG9w0B
+      CQEWGnNkb21tYXJhanVAc3RhdGVzdHJlZXQuY29tMIIBIjANBgkqhkiG9w0BAQEF
+      AAOCAQ8AMIIBCgKCAQEA1Hf36992uMU80Uqb+FNgeQeozDe0lEwSTdgiC0u/0YTP
+      PP54UAgwvP0Jf6hYgNkktgGHw3W1xY0bs3gcyKkqKDCLXumJvenifkgGYfDXZB9U
+      CYFtJdwOeQZSqK1JkZPqkXWw9/i9kghvvu0n3EYS39MlJG4x/JzTMQ6GtEeDKpBR
+      JRHM7iO8hEHeQYyCasb6TDydSXYUvDE6a59Iqt/yRbAg8R2/4QYMxKWrw5gyZF7f
+      YCgi0ZYLzrj5ksgtDccrmgOaN0dZhQpCUouEjgqYb9mkNZnojK8Gi/LVlQsAxPoM
+      713qVNZ/8cwiaCLlyJ9m/7aawt38f9y5vJCKoa1ZmQIDAQABMA0GCSqGSIb3DQEB
+      CwUAA4IBAQDACHJk4dGJZusYJdo2ItLloFQ6GETAPw3ctkWLsZz92zIzQbNIvTOc
+      HXR5y2LpDAIyVr45lPV0AI+UZrv3WGCmT0YPGSWi8+7WPBcQF5cfB2Lbc6Y3bK0q
+      Anaekl6hD+RXGx4mvDb71kOHS6k7IoQZ0bzHKun8+fNEZDYJRgtd7pLjeZW4PhL6
+      CJi8Y1CQ0qkKVUUY/3DbvSPE+18cJsglnPKHYZYl9IULN0DB1SwbqJc41woMUPdH
+      lDBk8Ta+xZgSnEGD2NSQBW+8v9URK6WCB1qe41/he1xGun6kGJxjbNI0bCLesgPR
+      aSmoPMAxXsFBKQWQEavDd1FunM+xLejz
+      -----END CERTIFICATE-----
+  ##
+  ## C3 authentication
+  ##
+  auth:
+    basic:
+      enabled: true
+      ##
+      ## map with key as user and value as password and role
+      property:
+        admin: Developer1,Administrators
+        disallowed: no_access
